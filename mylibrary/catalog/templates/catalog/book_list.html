@@ -1,0 +1,117 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Page header -->
+  <div class="mb-8">
+    <div class="flex items-center space-x-3">
+      <div class="flex-shrink-0">
+        <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+          <i class="fa-solid fa-book text-white text-xl"></i>
+        </div>
+      </div>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Book List</h1>
+        <p class="mt-1 text-sm text-gray-500">Explore our complete library collection</p>
+      </div>
+    </div>
+  </div>
+
+  {% if book_list %}
+  
+  <!-- Stats card -->
+  <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-200 hover:shadow-md transition-shadow mb-8">
+    <div class="p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+          <i class="fa-solid fa-book-open text-blue-600 text-xl"></i>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Total Books</dt>
+            <dd class="text-2xl font-semibold text-gray-900">{{ book_list.count }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Books grid -->
+  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {% for book in book_list %}
+    <a href="{{ book.get_absolute_url }}" 
+       class="group relative bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-xl transition-all duration-200">
+      <div class="p-6">
+        <div class="flex items-start space-x-4">
+          <!-- Book cover icon -->
+          <div class="flex-shrink-0">
+            <div class="h-20 w-14 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg shadow-lg flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+              <i class="fa-solid fa-book text-white text-2xl"></i>
+            </div>
+          </div>
+          
+          <!-- Book info -->
+          <div class="flex-1 min-w-0">
+            <h3 class="text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors mb-2 line-clamp-2">
+              {{ book.title }}
+            </h3>
+            
+            <div class="flex items-center text-sm text-gray-500 mb-3">
+              <i class="fa-solid fa-user-pen mr-1.5 text-gray-400"></i>
+              <span class="truncate">{{ book.author }}</span>
+            </div>
+            
+            <!-- Metadata -->
+            <div class="space-y-1.5">
+              {% if book.language %}
+              <div class="flex items-center text-xs text-gray-500">
+                <i class="fa-solid fa-language mr-1.5 text-gray-400 w-4"></i>
+                <span>{{ book.language }}</span>
+              </div>
+              {% endif %}
+              
+              <div class="flex items-center text-xs text-gray-500">
+                <i class="fa-solid fa-copy mr-1.5 text-gray-400 w-4"></i>
+                <span>{{ book.bookinstance_set.count }} cop{{ book.bookinstance_set.count|pluralize:"y,ies" }}</span>
+              </div>
+            </div>
+            
+            <!-- Genres -->
+            {% if book.genre.all %}
+            <div class="mt-3 flex flex-wrap gap-1">
+              {% for genre in book.genre.all|slice:":2" %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">
+                  {{ genre.name }}
+                </span>
+              {% endfor %}
+              {% if book.genre.all.count > 2 %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                  +{{ book.genre.all.count|add:"-2" }}
+                </span>
+              {% endif %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Hover indicator -->
+      <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <i class="fa-solid fa-arrow-up-right-from-square text-blue-600"></i>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <!-- Empty state -->
+  <div class="text-center bg-white rounded-xl shadow-sm border border-gray-200 py-12">
+    <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
+      <i class="fa-solid fa-book text-2xl text-blue-600"></i>
+    </div>
+    <h3 class="text-base font-semibold text-gray-900 mb-1">No books found</h3>
+    <p class="text-sm text-gray-500">There are no books in the library yet.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

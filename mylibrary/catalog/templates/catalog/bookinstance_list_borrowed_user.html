@@ -1,0 +1,166 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Page header -->
+  <div class="mb-8">
+    <div class="flex items-center space-x-3">
+      <div class="flex-shrink-0">
+        <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+          <i class="fa-solid fa-book-open-reader text-white text-xl"></i>
+        </div>
+      </div>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">My Borrowed Books</h1>
+        <p class="mt-1 text-sm text-gray-500">Books you currently have on loan</p>
+      </div>
+    </div>
+  </div>
+
+  {% if bookinstance_list %}
+  
+  <!-- Stats cards -->
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+    <!-- Total borrowed -->
+    <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-200 hover:shadow-md transition-shadow">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-amber-100 rounded-lg p-3">
+            <i class="fa-solid fa-book-open text-amber-600 text-xl"></i>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Books Borrowed</dt>
+              <dd class="text-2xl font-semibold text-gray-900">{{ bookinstance_list.count }}</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overdue count -->
+    {% with overdue_count=bookinstance_list|length %}
+    <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-200 hover:shadow-md transition-shadow">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-red-100 rounded-lg p-3">
+            <i class="fa-solid fa-triangle-exclamation text-red-600 text-xl"></i>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Overdue</dt>
+              <dd class="text-2xl font-semibold text-red-600">
+                {% for bookinst in bookinstance_list %}
+                  {% if bookinst.is_overdue %}1{% endif %}
+                {% empty %}
+                  0
+                {% endfor %}
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endwith %}
+  </div>
+
+  <!-- Books list -->
+  <div class="space-y-4">
+    {% for bookinst in bookinstance_list %}
+    <div class="bg-white rounded-xl border-2 {% if bookinst.is_overdue %}border-red-300 bg-red-50{% else %}border-gray-200{% endif %} overflow-hidden hover:shadow-lg transition-all duration-200">
+      <div class="p-6">
+        <div class="flex items-start space-x-4">
+          <!-- Book icon -->
+          <div class="flex-shrink-0">
+            <div class="h-20 w-14 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg shadow-lg flex items-center justify-center">
+              <i class="fa-solid fa-book text-white text-2xl"></i>
+            </div>
+          </div>
+          
+          <!-- Book details -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between">
+              <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                  <a href="{% url 'book-details' bookinst.book.pk %}" 
+                     class="hover:text-blue-600 transition-colors">
+                    {{ bookinst.book.title }}
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs ml-1"></i>
+                  </a>
+                </h3>
+                
+                <div class="flex items-center text-sm text-gray-600 mb-3">
+                  <i class="fa-solid fa-user-pen mr-2 text-gray-400"></i>
+                  <span>{{ bookinst.book.author }}</span>
+                </div>
+                
+                <!-- Due date -->
+                <div class="flex items-center space-x-2">
+                  <div class="flex items-center text-sm {% if bookinst.is_overdue %}text-red-700{% else %}text-gray-700{% endif %}">
+                    <i class="fa-solid fa-calendar-days mr-2 {% if bookinst.is_overdue %}text-red-500{% else %}text-gray-400{% endif %}"></i>
+                    <span class="font-medium">Due: {{ bookinst.due_back|date:"F j, Y" }}</span>
+                  </div>
+                  
+                  {% if bookinst.is_overdue %}
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-red-100 text-red-800 ring-1 ring-inset ring-red-600/20">
+                      <i class="fa-solid fa-circle-exclamation mr-1.5"></i>
+                      OVERDUE
+                    </span>
+                  {% else %}
+                    <!-- Calculate days remaining -->
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800 ring-1 ring-inset ring-green-600/20">
+                      <i class="fa-solid fa-circle-check mr-1.5"></i>
+                      On time
+                    </span>
+                  {% endif %}
+                </div>
+                
+                <!-- Additional info -->
+                <div class="mt-3 pt-3 border-t border-gray-200">
+                  <div class="flex items-center space-x-4 text-xs text-gray-500">
+                    <div class="flex items-center">
+                      <i class="fa-solid fa-hashtag mr-1.5 text-gray-400"></i>
+                      <code class="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-700 font-mono">{{ bookinst.id }}</code>
+                    </div>
+                    <div class="flex items-center">
+                      <i class="fa-solid fa-print mr-1.5 text-gray-400"></i>
+                      <span>{{ bookinst.imprint }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Overdue warning footer -->
+      {% if bookinst.is_overdue %}
+      <div class="bg-red-100 border-t border-red-200 px-6 py-3">
+        <div class="flex items-center text-sm text-red-800">
+          <i class="fa-solid fa-circle-info mr-2"></i>
+          <span class="font-medium">This book is overdue. Please return it as soon as possible to avoid late fees.</span>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <!-- Empty state -->
+  <div class="text-center bg-white rounded-xl shadow-sm border border-gray-200 py-12">
+    <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-amber-100 mb-4">
+      <i class="fa-solid fa-book-open-reader text-2xl text-amber-600"></i>
+    </div>
+    <h3 class="text-base font-semibold text-gray-900 mb-1">No borrowed books</h3>
+    <p class="text-sm text-gray-500 mb-4">You don't have any books on loan at the moment.</p>
+    <a href="{% url 'books' %}" 
+       class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm">
+      <i class="fa-solid fa-magnifying-glass mr-2"></i>
+      Browse Books
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

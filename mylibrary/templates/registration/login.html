@@ -1,0 +1,161 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
+    <!-- Logo and header -->
+    <div class="text-center">
+      <div class="flex justify-center">
+        <div class="h-16 w-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl shadow-lg flex items-center justify-center">
+          <i class="fa-solid fa-book-open text-white text-3xl"></i>
+        </div>
+      </div>
+      <h2 class="mt-6 text-3xl font-bold text-gray-900">
+        Welcome Back
+      </h2>
+      <p class="mt-2 text-sm text-gray-600">
+        Sign in to access your library account
+      </p>
+    </div>
+
+    <!-- Error messages -->
+    {% if form.errors %}
+    <div class="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 shadow-sm">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <i class="fa-solid fa-circle-exclamation text-red-500 text-lg"></i>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">Authentication Error</h3>
+          <p class="mt-1 text-sm text-red-700">
+            Your username and password didn't match. Please try again.
+          </p>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if next %}
+      {% if user.is_authenticated %}
+      <div class="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-4 shadow-sm">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <i class="fa-solid fa-triangle-exclamation text-amber-500 text-lg"></i>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-amber-800">Access Denied</h3>
+            <p class="mt-1 text-sm text-amber-700">
+              Your account doesn't have access to this page. Please login with an account that has access.
+            </p>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 shadow-sm">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <i class="fa-solid fa-circle-info text-blue-500 text-lg"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-blue-700">
+              Please login to see this page.
+            </p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    {% endif %}
+
+    <!-- Login form -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+      <div class="px-8 py-8">
+        <form method="post" action="{% url 'login' %}" class="space-y-6">
+          {% csrf_token %}
+          
+          <!-- Username field -->
+          <div>
+            <label for="{{ form.username.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fa-solid fa-user text-gray-400 mr-2"></i>
+              {{ form.username.label }}
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fa-solid fa-user text-gray-400"></i>
+              </div>
+              <input type="text" 
+                     name="{{ form.username.name }}" 
+                     id="{{ form.username.id_for_label }}"
+                     class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all {% if form.username.errors %}border-red-500 focus:ring-red-500{% endif %}"
+                     placeholder="Enter your username"
+                     {% if form.username.value %}value="{{ form.username.value }}"{% endif %}
+                     required>
+            </div>
+            {% if form.username.errors %}
+              <p class="mt-2 text-sm text-red-600 flex items-center">
+                <i class="fa-solid fa-circle-exclamation mr-1"></i>
+                {{ form.username.errors.0 }}
+              </p>
+            {% endif %}
+          </div>
+
+          <!-- Password field -->
+          <div>
+            <label for="{{ form.password.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fa-solid fa-lock text-gray-400 mr-2"></i>
+              {{ form.password.label }}
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fa-solid fa-lock text-gray-400"></i>
+              </div>
+              <input type="password" 
+                     name="{{ form.password.name }}" 
+                     id="{{ form.password.id_for_label }}"
+                     class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all {% if form.password.errors %}border-red-500 focus:ring-red-500{% endif %}"
+                     placeholder="Enter your password"
+                     required>
+            </div>
+            {% if form.password.errors %}
+              <p class="mt-2 text-sm text-red-600 flex items-center">
+                <i class="fa-solid fa-circle-exclamation mr-1"></i>
+                {{ form.password.errors.0 }}
+              </p>
+            {% endif %}
+          </div>
+
+          <!-- Hidden next field -->
+          <input type="hidden" name="next" value="{{ next }}">
+
+          <!-- Submit button -->
+          <div>
+            <button type="submit"
+                    class="group relative w-full flex justify-center items-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-xl transition-all duration-200">
+              <i class="fa-solid fa-right-to-bracket mr-2"></i>
+              Sign In
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Password reset link -->
+      <div class="px-8 py-4 bg-gray-50 border-t border-gray-200">
+        <div class="flex items-center justify-center text-sm">
+          <a href="{% url 'password_reset' %}" 
+             class="font-medium text-blue-600 hover:text-blue-800 transition-colors flex items-center">
+            <i class="fa-solid fa-key mr-2"></i>
+            Forgot your password?
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional info -->
+    <div class="text-center">
+      <p class="text-xs text-gray-500">
+        <i class="fa-solid fa-shield-halved mr-1"></i>
+        Your information is secure and encrypted
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

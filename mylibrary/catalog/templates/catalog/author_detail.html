@@ -1,0 +1,130 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Back button -->
+  <div class="mb-6">
+    <a href="{% url 'authors' %}" 
+       class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+      <i class="fa-solid fa-arrow-left mr-2"></i>
+      Back to Authors
+    </a>
+  </div>
+
+  <!-- Author header card -->
+  <div class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden mb-8">
+    <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-8">
+      <div class="flex items-center space-x-4">
+        <div class="flex-shrink-0">
+          <div class="h-20 w-20 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center shadow-lg">
+            <i class="fa-solid fa-user-pen text-3xl text-white"></i>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h1 class="text-3xl font-bold text-white truncate">
+            {{ author.first_name }} {{ author.last_name }}
+          </h1>
+          {% if author.date_of_birth or author.date_of_death %}
+          <div class="mt-2 flex items-center text-blue-100">
+            <i class="fa-solid fa-calendar-days mr-2"></i>
+            <span class="text-sm font-medium">
+              {% if author.date_of_birth %}
+                {{ author.date_of_birth|date:"F j, Y" }}
+              {% else %}
+                Unknown
+              {% endif %}
+              -
+              {% if author.date_of_death %}
+                {{ author.date_of_death|date:"F j, Y" }}
+              {% else %}
+                Present
+              {% endif %}
+            </span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Books section -->
+  <div class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+    <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="flex-shrink-0">
+            <div class="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+              <i class="fa-solid fa-book text-blue-600"></i>
+            </div>
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900">Books by this Author</h2>
+            <p class="text-sm text-gray-500">{{ author.book_set.all.count }} book{{ author.book_set.all.count|pluralize }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-6 py-6">
+      {% if author.book_set.all %}
+        <div class="space-y-6">
+          {% for book in author.book_set.all %}
+          <div class="group relative bg-gray-50 hover:bg-gray-100 rounded-lg p-5 transition-all duration-200 border border-gray-200 hover:border-blue-300 hover:shadow-md">
+            <div class="flex items-start space-x-4">
+              <!-- Book icon -->
+              <div class="flex-shrink-0">
+                <div class="h-16 w-12 bg-gradient-to-br from-slate-700 to-slate-900 rounded-md shadow-md flex items-center justify-center">
+                  <i class="fa-solid fa-book-open text-white text-lg"></i>
+                </div>
+              </div>
+              
+              <!-- Book details -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <h3 class="text-base font-semibold text-gray-900 mb-2">
+                      <a href="{% url 'book-details' book.pk %}" 
+                         class="hover:text-blue-600 transition-colors">
+                        {{ book.title }}
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs ml-1 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                      </a>
+                    </h3>
+                    <p class="text-sm text-gray-600 line-clamp-2 mb-3">
+                      {{ book.summary }}
+                    </p>
+                    
+                    <!-- Book metadata -->
+                    <div class="flex items-center space-x-4 text-xs text-gray-500">
+                      <div class="flex items-center">
+                        <i class="fa-solid fa-copy mr-1.5"></i>
+                        <span class="font-medium">{{ book.bookinstance_set.all.count }}</span>
+                        <span class="ml-1">cop{{ book.bookinstance_set.all.count|pluralize:"y,ies" }} available</span>
+                      </div>
+                      {% if book.language %}
+                      <div class="flex items-center">
+                        <i class="fa-solid fa-language mr-1.5"></i>
+                        <span>{{ book.language }}</span>
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <!-- Empty state -->
+        <div class="text-center py-12">
+          <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-gray-100 mb-4">
+            <i class="fa-solid fa-book-open text-2xl text-gray-400"></i>
+          </div>
+          <h3 class="text-base font-semibold text-gray-900 mb-1">No books yet</h3>
+          <p class="text-sm text-gray-500">This author doesn't have any books in our library.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

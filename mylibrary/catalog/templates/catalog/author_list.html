@@ -1,0 +1,104 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Page header -->
+  <div class="mb-8">
+    <div class="flex items-center space-x-3">
+      <div class="flex-shrink-0">
+        <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg">
+          <i class="fa-solid fa-users text-white text-xl"></i>
+        </div>
+      </div>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Author List</h1>
+        <p class="mt-1 text-sm text-gray-500">Browse all authors in our library collection</p>
+      </div>
+    </div>
+  </div>
+
+  {% if author_list %}
+  
+  <!-- Stats card -->
+  <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-200 hover:shadow-md transition-shadow mb-8">
+    <div class="p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 bg-purple-100 rounded-lg p-3">
+          <i class="fa-solid fa-user-pen text-purple-600 text-xl"></i>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Total Authors</dt>
+            <dd class="text-2xl font-semibold text-gray-900">{{ author_list.count }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Authors grid -->
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {% for author in author_list %}
+    <a href="{{ author.get_absolute_url }}" 
+       class="group relative bg-white rounded-xl border border-gray-200 p-6 hover:border-purple-300 hover:shadow-lg transition-all duration-200">
+      <div class="flex items-center space-x-4">
+        <!-- Avatar -->
+        <div class="flex-shrink-0">
+          <div class="h-14 w-14 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+            {{ author.first_name|slice:":1" }}{{ author.last_name|slice:":1" }}
+          </div>
+        </div>
+        
+        <!-- Author info -->
+        <div class="flex-1 min-w-0">
+          <h3 class="text-base font-semibold text-gray-900 group-hover:text-purple-600 transition-colors truncate">
+            {{ author.first_name }} {{ author.last_name }}
+          </h3>
+          
+          {% if author.date_of_birth or author.date_of_death %}
+          <div class="mt-1 flex items-center text-xs text-gray-500">
+            <i class="fa-solid fa-calendar-days mr-1.5"></i>
+            <span>
+              {% if author.date_of_birth %}
+                {{ author.date_of_birth.year }}
+              {% else %}
+                ?
+              {% endif %}
+              -
+              {% if author.date_of_death %}
+                {{ author.date_of_death.year }}
+              {% else %}
+                <i class="fa-solid fa-infinity text-xs"></i>
+              {% endif %}
+            </span>
+          </div>
+          {% endif %}
+          
+          <!-- Book count -->
+          <div class="mt-2 flex items-center text-xs text-gray-500">
+            <i class="fa-solid fa-book mr-1.5"></i>
+            <span>{{ author.book_set.count }} book{{ author.book_set.count|pluralize }}</span>
+          </div>
+        </div>
+        
+        <!-- Arrow icon -->
+        <div class="flex-shrink-0">
+          <i class="fa-solid fa-chevron-right text-gray-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all duration-200"></i>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <!-- Empty state -->
+  <div class="text-center bg-white rounded-xl shadow-sm border border-gray-200 py-12">
+    <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 mb-4">
+      <i class="fa-solid fa-user-pen text-2xl text-purple-600"></i>
+    </div>
+    <h3 class="text-base font-semibold text-gray-900 mb-1">No authors found</h3>
+    <p class="text-sm text-gray-500">There are no authors in the library yet.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

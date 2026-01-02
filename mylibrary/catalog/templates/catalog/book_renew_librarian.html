@@ -1,0 +1,192 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Page header / breadcrumb -->
+  <div class="mb-6">
+    <a href="{% url 'all-borrowed' %}" 
+       class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+      <i class="fa-solid fa-arrow-left mr-2"></i>
+      Back to all borrowed books
+    </a>
+  </div>
+
+  <!-- Header -->
+  <div class="mb-6 flex items-center space-x-3">
+    <div class="flex-shrink-0">
+      <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+        <i class="fa-solid fa-calendar-check text-white text-xl"></i>
+      </div>
+    </div>
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Renew Loan</h1>
+      <p class="mt-1 text-sm text-gray-500">Update the due date for this borrowed book</p>
+    </div>
+  </div>
+
+  <!-- Book + borrower summary -->
+  <div class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden mb-6">
+    <div class="px-6 py-5">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0">
+            <div class="h-16 w-12 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg shadow-md flex items-center justify-center">
+              <i class="fa-solid fa-book text-white text-lg"></i>
+            </div>
+          </div>
+          <div>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Book</p>
+            <h2 class="text-lg font-semibold text-gray-900">
+              <a href="{% url 'book-details' book_instance.book.pk %}" 
+                 class="hover:text-blue-600 hover:underline">
+                {{ book_instance.book.title }}
+              </a>
+            </h2>
+            <p class="text-sm text-gray-600 mt-1 flex items-center">
+              <i class="fa-solid fa-user-pen mr-2 text-gray-400"></i>
+              {{ book_instance.book.author }}
+            </p>
+          </div>
+        </div>
+
+        <div class="border-t sm:border-t-0 sm:border-l border-gray-200 pt-4 sm:pt-0 sm:pl-6">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Borrower</p>
+          {% if book_instance.borrower %}
+          <div class="flex items-center space-x-3">
+            <div class="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
+              {{ book_instance.borrower.get_username|slice:":1"|upper }}
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-900">{{ book_instance.borrower.get_username }}</p>
+              <p class="text-xs text-gray-500">Library member</p>
+            </div>
+          </div>
+          {% else %}
+          <p class="text-sm text-gray-500 italic">No borrower assigned</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Current due date / status -->
+      <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Current due date</p>
+          <p class="text-sm {% if book_instance.is_overdue %}text-red-700 font-semibold{% else %}text-gray-900{% endif %}">
+            <i class="fa-solid fa-calendar-days mr-2 {% if book_instance.is_overdue %}text-red-500{% else %}text-gray-400{% endif %}"></i>
+            {{ book_instance.due_back|date:"F j, Y" }}
+          </p>
+          {% if book_instance.is_overdue %}
+          <p class="mt-1 text-xs text-red-600 flex items-center">
+            <i class="fa-solid fa-triangle-exclamation mr-1.5"></i>
+            This loan is overdue
+          </p>
+          {% endif %}
+        </div>
+
+        <div class="bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</p>
+          <p class="text-sm text-gray-900 flex items-center">
+            {% if book_instance.status == 'o' %}
+              <i class="fa-solid fa-book-open-reader text-amber-500 mr-2"></i>
+              On loan
+            {% elif book_instance.status == 'a' %}
+              <i class="fa-solid fa-circle-check text-green-500 mr-2"></i>
+              Available
+            {% elif book_instance.status == 'r' %}
+              <i class="fa-solid fa-bookmark text-blue-500 mr-2"></i>
+              Reserved
+            {% else %}
+              <i class="fa-solid fa-wrench text-gray-500 mr-2"></i>
+              Maintenance
+            {% endif %}
+          </p>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Copy ID</p>
+          <p class="text-sm text-gray-900 flex items-center">
+            <i class="fa-solid fa-hashtag text-gray-400 mr-2"></i>
+            <code class="text-xs bg-gray-100 px-2 py-1 rounded font-mono break-all">
+              {{ book_instance.id }}
+            </code>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form card -->
+  <div class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden max-w-xl">
+    <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+      <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+        <i class="fa-solid fa-pen-to-square text-blue-600 mr-2"></i>
+        Set new due date
+      </h2>
+      <p class="mt-1 text-xs text-gray-500">
+        Choose a new due date according to library policy.
+      </p>
+    </div>
+
+    <div class="px-6 py-6">
+      <form action="" method="post" class="space-y-6">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="bg-red-50 border border-red-200 text-red-800 text-sm rounded-lg p-3 mb-4">
+          <div class="flex">
+            <i class="fa-solid fa-circle-exclamation mt-0.5 mr-2"></i>
+            <div>
+              {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Renewal date field -->
+        <div>
+        <label for="{{ form.renewal_date.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fa-solid fa-calendar-plus mr-2 text-gray-400"></i>
+            {{ form.renewal_date.label }}
+        </label>
+        <div class="relative">
+            <!-- Fixed icon positioning with proper padding -->
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 pr-3">
+            <i class="fa-solid fa-calendar-days text-gray-400 text-lg"></i>
+            </div>
+            {{ form.renewal_date }}
+        </div>
+        {% if form.renewal_date.help_text %}
+        <p class="mt-1 text-xs text-gray-500">
+            <i class="fa-solid fa-circle-info mr-1"></i>
+            {{ form.renewal_date.help_text }}
+        </p>
+        {% endif %}
+        {% if form.renewal_date.errors %}
+        <p class="mt-1 text-xs text-red-600 flex items-center">
+            <i class="fa-solid fa-circle-exclamation mr-1"></i>
+            {{ form.renewal_date.errors.0 }}
+        </p>
+        {% endif %}
+        </div>
+
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end space-x-3 pt-2">
+          <a href="{% url 'all-borrowed' %}"
+             class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition">
+            <i class="fa-solid fa-xmark mr-2"></i>
+            Cancel
+          </a>
+          <button type="submit"
+                  class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+            <i class="fa-solid fa-floppy-disk mr-2"></i>
+            Save new due date
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

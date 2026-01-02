@@ -1,0 +1,235 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Back button -->
+  <div class="mb-6">
+    <a href="{% url 'books' %}" 
+       class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+      <i class="fa-solid fa-arrow-left mr-2"></i>
+      Back to Books
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main book info -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Book header card -->
+      <div class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8">
+          <div class="flex items-start space-x-4">
+            <div class="flex-shrink-0">
+              <div class="h-24 w-18 bg-gradient-to-br from-slate-800 to-slate-950 rounded-lg shadow-xl flex items-center justify-center border-2 border-white/20">
+                <i class="fa-solid fa-book text-3xl text-white"></i>
+              </div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h1 class="text-3xl font-bold text-white mb-3">
+                {{ book.title }}
+              </h1>
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-user-pen text-blue-200"></i>
+                <span class="text-blue-100">by</span>
+                <a href="{{ book.author.get_absolute_url }}" 
+                   class="text-white font-medium hover:text-blue-100 hover:underline transition-colors">
+                  {{ book.author }}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Book details -->
+        <div class="px-6 py-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <i class="fa-solid fa-circle-info text-blue-600 mr-2"></i>
+            About this Book
+          </h2>
+          <p class="text-gray-700 leading-relaxed">
+            {{ book.summary }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Copies section -->
+      <div class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+        <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="flex-shrink-0">
+                <div class="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
+                  <i class="fa-solid fa-copy text-green-600"></i>
+                </div>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-gray-900">Available Copies</h2>
+                <p class="text-sm text-gray-500">{{ book.bookinstance_set.all.count }} cop{{ book.bookinstance_set.all.count|pluralize:"y,ies" }} in library</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="px-6 py-6">
+          {% if book.bookinstance_set.all %}
+            <div class="space-y-4">
+              {% for copy in book.bookinstance_set.all %}
+              <div class="bg-gray-50 rounded-lg p-5 border border-gray-200 hover:border-gray-300 transition-colors">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <!-- Status badge -->
+                    <div class="mb-3">
+                      {% if copy.status == 'a' %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800 ring-1 ring-inset ring-green-600/20">
+                          <i class="fa-solid fa-circle-check mr-2"></i>
+                          {{ copy.get_status_display }}
+                        </span>
+                      {% elif copy.status == 'm' %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-800 ring-1 ring-inset ring-red-600/20">
+                          <i class="fa-solid fa-wrench mr-2"></i>
+                          {{ copy.get_status_display }}
+                        </span>
+                      {% elif copy.status == 'o' %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-amber-100 text-amber-800 ring-1 ring-inset ring-amber-600/20">
+                          <i class="fa-solid fa-book-open-reader mr-2"></i>
+                          {{ copy.get_status_display }}
+                        </span>
+                      {% else %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 ring-1 ring-inset ring-blue-600/20">
+                          <i class="fa-solid fa-bookmark mr-2"></i>
+                          {{ copy.get_status_display }}
+                        </span>
+                      {% endif %}
+                    </div>
+
+                    <!-- Copy details -->
+                    <div class="space-y-2">
+                      {% if copy.status != 'a' and copy.due_back %}
+                      <div class="flex items-center text-sm">
+                        <i class="fa-solid fa-calendar-days text-gray-400 mr-2 w-4"></i>
+                        <span class="text-gray-600 font-medium mr-2">Due back:</span>
+                        <span class="text-gray-900 {% if copy.is_overdue %}text-red-600 font-semibold{% endif %}">
+                          {{ copy.due_back|date:"M d, Y" }}
+                          {% if copy.is_overdue %}
+                            <i class="fa-solid fa-triangle-exclamation ml-1 text-red-600"></i>
+                          {% endif %}
+                        </span>
+                      </div>
+                      {% endif %}
+
+                      <div class="flex items-center text-sm">
+                        <i class="fa-solid fa-print text-gray-400 mr-2 w-4"></i>
+                        <span class="text-gray-600 font-medium mr-2">Imprint:</span>
+                        <span class="text-gray-900">{{ copy.imprint }}</span>
+                      </div>
+
+                      <div class="flex items-center text-sm">
+                        <i class="fa-solid fa-hashtag text-gray-400 mr-2 w-4"></i>
+                        <span class="text-gray-600 font-medium mr-2">Copy ID:</span>
+                        <code class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-700 font-mono">{{ copy.id }}</code>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-8">
+              <div class="inline-flex items-center justify-center h-12 w-12 rounded-full bg-gray-100 mb-3">
+                <i class="fa-solid fa-copy text-xl text-gray-400"></i>
+              </div>
+              <p class="text-sm text-gray-500">No copies available for this book.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar with metadata -->
+    <div class="lg:col-span-1">
+      <div class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden sticky top-8">
+        <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+          <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fa-solid fa-list-check text-gray-700 mr-2"></i>
+            Book Details
+          </h2>
+        </div>
+        
+        <div class="px-6 py-6 space-y-5">
+          <!-- ISBN -->
+          <div>
+            <div class="flex items-center text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              <i class="fa-solid fa-barcode mr-2"></i>
+              ISBN
+            </div>
+            <code class="text-sm bg-gray-100 px-3 py-2 rounded-lg text-gray-900 font-mono block">{{ book.isbn }}</code>
+          </div>
+
+          <!-- Language -->
+          <div>
+            <div class="flex items-center text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              <i class="fa-solid fa-language mr-2"></i>
+              Language
+            </div>
+            <p class="text-sm font-medium text-gray-900">{{ book.language }}</p>
+          </div>
+
+          <!-- Genres -->
+          <div>
+            <div class="flex items-center text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              <i class="fa-solid fa-tags mr-2"></i>
+              Genre{{ book.genre.all|pluralize }}
+            </div>
+            <div class="flex flex-wrap gap-2">
+              {% for genre in book.genre.all %}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 ring-1 ring-inset ring-indigo-600/20">
+                  {{ genre.name }}
+                </span>
+              {% empty %}
+                <span class="text-sm text-gray-500 italic">No genres specified</span>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Availability summary -->
+          <div class="pt-5 border-t border-gray-200">
+            <div class="flex items-center text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+              <i class="fa-solid fa-chart-simple mr-2"></i>
+              Availability
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-600">Total copies:</span>
+                <span class="font-semibold text-gray-900">
+                  {{ total_copies }}
+                </span>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-600">Available:</span>
+                <span class="font-semibold text-green-600">
+                  {{ available_copies }}
+                </span>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-600">Reserved:</span>
+                <span class="font-semibold text-purple-600">
+                  {{ reserved_copies }}
+                </span>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-600">On loan:</span>
+                <span class="font-semibold text-amber-600">
+                  {{ on_loan_copies }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
